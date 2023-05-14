@@ -27,17 +27,31 @@ async function run() {
                 $and: query
             });
             if (result !== null) {
-                res.send({data:result, status:true});
+                res.send({ data: result, status: true });
             } else {
-                res.send({data:{}, status:false})
+                res.send({ data: {}, status: false })
             }
 
         })
         app.post('/flights', async (req, res) => {
             const flight = req.body;
             console.log(flight);
-            const result = await flightCollection.insertOne(flight);
-            res.send(result);
+            const query = [
+                { 'source': req.body.source },
+                { 'destination': req.body.destination },
+                { 'date': req.body.date }];
+            console.log(query);
+            const result = await flightCollection.findOne({
+                $and: query
+            });
+            if (result) {
+                res.send({acknowledged: false});
+            }
+            else {
+                const result = await flightCollection.insertOne(flight);
+                res.send(result);
+            }
+
         })
     }
     finally {
