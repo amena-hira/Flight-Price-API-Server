@@ -18,8 +18,25 @@ async function run() {
         const flightCollection = client.db('flightPrice').collection('flightPrice');
 
         app.get('/flights', async (req, res) => {
-            const query = {};
-            const result = await flightCollection.find(query).toArray();
+            const query = [
+                { 'source': req.query.source },
+                { 'destination': req.query.destination },
+                { 'date': req.query.date }];
+            console.log(query);
+            const result = await flightCollection.findOne({
+                $and: query
+            });
+            if (result !== null) {
+                res.send({data:result, status:true});
+            } else {
+                res.send({data:{}, status:false})
+            }
+
+        })
+        app.post('/flights', async (req, res) => {
+            const flight = req.body;
+            console.log(flight);
+            const result = await flightCollection.insertOne(flight);
             res.send(result);
         })
     }
